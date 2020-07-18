@@ -1,6 +1,21 @@
 package usecase;
 
-public class EmpWageArray {
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+
+public interface ICopmuteEmpWage {
+
+	public void addCompanyEmpWage(int NUM_OF_WORK_DAYS, int MAX_HOURS_PER_MONTH, int EMP_RATE_PER_HOURS,
+			String COMPANY);
+
+	public void computeEmpWage();
+
+	public int getToatalWage(String company);
+
+}
+
+public class CompanyEmpWage {
 
 	public String COMPANY = "";
 	public int EMP_RATE_PER_HOURS = 0;
@@ -9,7 +24,7 @@ public class EmpWageArray {
 	public int totalEmpWage;
 
 	// constructor stub
-	public EmpWageArray(int NUM_OF_WORK_DAYS, int MAX_HOURS_PER_MONTH, int EMP_RATE_PER_HOURS, String COMPANY) {
+	public CompanyEmpWage(int NUM_OF_WORK_DAYS, int MAX_HOURS_PER_MONTH, int EMP_RATE_PER_HOURS, String COMPANY) {
 		this.COMPANY = COMPANY;
 		this.EMP_RATE_PER_HOURS = EMP_RATE_PER_HOURS;
 		this.MAX_HOURS_PER_MONTH = MAX_HOURS_PER_MONTH;
@@ -29,40 +44,44 @@ public class EmpWageArray {
 	}
 }
 
-public class EmpWageArray1 {
+public class EmpWageBuilder implements ICopmuteEmpWage {
 
 	public static final int IS_PART_TIME = 1;
 	public static final int IS_FULL_TIME = 2;
 
 	private int numOfCompany = 0;
-	private EmpWageArray1[] EmpWageArray;
+	private LinkedList<CompanyEmpWage> companyEmpWageList;
+	private Map<String, CompanyEmpWage> companyEmpWageMap;
 
-	public EmpWageArray1() {
-		// TODO Auto-generated constructor stub
-		EmpWageArray = new EmpWageArray1[5];
+	public EmpWageBuilder() {
+		companyEmpWageList = new LinkedList<CompanyEmpWage>();
+		companyEmpWageMap = new HashMap<String, CompanyEmpWage>();
 	}
 
-	private void addCompanyEmpWage(String COMPANY, int EMP_RATE_PER_HOURS, int NUM_OF_WORK_DAYS,
-			int MAX_HOURS_PER_MONTH) {
-		EmpWageArray[numOfCompany] = new EmpWageArray(MAX_HOURS_PER_MONTH, MAX_HOURS_PER_MONTH, MAX_HOURS_PER_MONTH,
+	@Override
+	public void addCompanyEmpWage(int NUM_OF_WORK_DAYS, int MAX_HOURS_PER_MONTH, int EMP_RATE_PER_HOURS,
+			String COMPANY) {
+		CompanyEmpWage companyEmpWage = new CompanyEmpWage(NUM_OF_WORK_DAYS, MAX_HOURS_PER_MONTH, EMP_RATE_PER_HOURS,
 				COMPANY);
-		numOfCompany++;
+		companyEmpWageList.add(companyEmpWage);
+		companyEmpWageMap.put(COMPANY, companyEmpWage);
+
 	}
 
-	private void countEmpWage() {
-		for (int i = 0; i < numOfCompany; i++) {
-			EmpWageArray[i].setTotalEmpWage(this.countEmpWage(EmpWageArray[i]));
-			System.out.println(EmpWageArray[i]);
-
+	@Override
+	public void computeEmpWage() {
+		for (int i = 0; i < companyEmpWageList.size(); i++) {
+			CompanyEmpWage companyEmpWage = companyEmpWageList.get(i);
+			companyEmpWage.setTotalEmpWage(this.computeEmpWage(companyEmpWage));
+			System.out.println(companyEmpWage);
 		}
 
 	}
 
-	private int countEmpWage(EmpWageArray1 empWage) {
-		// TODO Auto-generated method stub
+	public  int computeEmpWage(CompanyEmpWage companyEmpWage) {
 		int empHrs = 0, totalEmpHrs = 0, totalWorkingDays = 0;
-		int empCheck;
-		while (totalEmpHrs <= empWage.MAX_HOURS_PER_MONTH && totalWorkingDays <= empWage.NUM_OF_WORK_DAYS)
+		int empCheck = 0;
+		while (totalEmpHrs <= companyEmpWage.MAX_HOURS_PER_MONTH && totalWorkingDays <= companyEmpWage.NUM_OF_WORK_DAYS)
 			empCheck = (int) Math.floor(Math.random() * 10) % 3;
 		switch (empCheck) {
 
@@ -79,15 +98,22 @@ public class EmpWageArray1 {
 		}
 		totalEmpHrs += empHrs;
 		System.out.println("day -> " + totalWorkingDays + "hrs " + empHrs);
-		return totalEmpHrs * empWage.EMP_RATE_PER_HOURS;
+		return totalEmpHrs * companyEmpWage.EMP_RATE_PER_HOURS;
 	}
-	
+
+	@Override
+	public int getToatalWage(String company) {
+
+		return companyEmpWageMap.get(company).totalEmpWage;
+	}
+
 	public static void main(String[] args) {
 		
-		EmpWageArray1 obj1 = new EmpWageArray1();
-        obj1.addCompanyEmpWage("Apple", 20, 2, 10);
-       obj1.addCompanyEmpWage("Google", 20, 2, 10);
+		ICopmuteEmpWage empWageBuilder = new EmpWageBuilder();
+		empWageBuilder.addCompanyEmpWage(10, 20, 2, "Apple");
+		empWageBuilder.addCompanyEmpWage(10, 20, 2, "Google");
+		empWageBuilder.computeEmpWage();
+		
+
 	}
-
 }
-
